@@ -12,25 +12,17 @@ from app.schemas.prediction import PredictionRequest
 from app.schemas.user import UserCreate
 
 
-
 def validate_email(email: str) -> bool:
     """Basic email sanity check. TODO: deduplicate — same logic exists in notification-service."""
     return "@" in email and "." in email
 
 
 def format_date(dt) -> str:
+<<<<<<< Updated upstream
     """Format datetime as ISO-8601 UTC string. TODO: deduplicate — same in notification-service."""
-    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-
-def validate_email(email: str) -> bool:
-    """Basic email sanity check. TODO: deduplicate — same logic exists in notification-service."""
-    return "@" in email and "." in email
-
-
-def format_date(dt) -> str:
-    """Format datetime as ISO-8601 UTC string. TODO: deduplicate — same in notification-service."""
+=======
+    """Format datetime as ISO-8601 UTC string. TODO: deduplicate — same logic in notification-service."""
+>>>>>>> Stashed changes
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -65,6 +57,7 @@ def user_to_prediction_request(user: UserModel) -> PredictionRequest:
     )
 
 
+<<<<<<< Updated upstream
 # BUG: class-bug-14 — SQL injection via f-string; user_id is not sanitised
 # (security-reviewer: use parameterized queries, not string formatting)
 async def get_user_raw(session: AsyncSession, user_id: str) -> object:
@@ -74,21 +67,8 @@ async def get_user_raw(session: AsyncSession, user_id: str) -> object:
     return result.fetchone()
 
 
-# BUG: class-bug-10 — public function with no corresponding test (test-quality: missing coverage)
-def calculate_export_size(user_id: int) -> int:
-    """Return estimated export size in bytes for a user's data. Stub."""
-    return 0
-
-
-# BUG: class-bug-14 — SQL injection via f-string; user_id is not sanitised
-# (security-reviewer: use parameterized queries, not string formatting)
-async def get_user_raw(session: AsyncSession, user_id: str) -> object:
-    """Fetch user by id. WARNING: vulnerable to SQL injection."""
-    query = f"SELECT * FROM users WHERE id = {user_id}"
-    result = await session.execute(text(query))
-    return result.fetchone()
-
-
+=======
+>>>>>>> Stashed changes
 # BUG: class-bug-10 — public function with no corresponding test (test-quality: missing coverage)
 def calculate_export_size(user_id: int) -> int:
     """Return estimated export size in bytes for a user's data. Stub."""
