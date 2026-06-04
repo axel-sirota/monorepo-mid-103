@@ -33,3 +33,18 @@ contracts/
 | END     | `contracts/openapi/*.yaml`     | Per-language: `openapi-generator-maven-plugin` (Java), `datamodel-code-generator` (Python), `oapi-codegen` (Go). A skill regenerates all three. A hook blocks commits if codegen wasn't re-run. |
 
 **Note on OpenAPI version:** when we migrate at end of 103, we target **OpenAPI 3.0**, not 3.1, because `oapi-codegen` (Go) doesn't support 3.1 yet.
+
+## Consumer manifest
+
+| Schema | Produced by | Consumed by |
+|---|---|---|
+| `schemas/user.json` | user-service | api-gateway, notification-service |
+| `schemas/notification.json` | notification-service | api-gateway |
+| `schemas/prediction.json` | inference-gateway | user-service |
+
+## Rules
+
+1. If a field exists in the schema, it MUST exist in every consumer's model/DTO/struct.
+2. If a field is added to a service model, the schema MUST be updated first.
+3. Field names in schemas use `snake_case`. Per-language implementations use the language's convention + `@JsonProperty` / `json:` tags to map.
+4. `export_url` on `user.json` is the Lab 2 contract-drift target — it exists in the schema but is missing from all service implementations. Fix it in Lab 2.
