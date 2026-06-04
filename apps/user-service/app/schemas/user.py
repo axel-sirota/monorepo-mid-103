@@ -1,9 +1,6 @@
 """Pydantic v2 models for the User API surface."""
-# BUG: class-bug-7 — User shape duplicated: also defined in api-gateway UserDto.java and
-# notification-service internal/model/user.go. lib-extractor should flag this.
-# TODO: deduplicate
-# BUG: class-bug-7 — User shape duplicated: also defined in api-gateway UserDto.java and
-# notification-service internal/model/user.go. lib-extractor should flag this.
+# BUG: class-bug-7 (lib-extractor): User shape duplicated — also defined in
+# api-gateway UserDto.java and notification-service internal/model/user.go.
 # TODO: deduplicate
 from __future__ import annotations
 
@@ -32,3 +29,5 @@ class User(BaseModel):
     days_since_login: int = Field(ge=0)
     sessions_last_30d: int = Field(ge=0)
     support_tickets_last_90d: int = Field(ge=0)
+    # NOTE: export_url intentionally absent — present in contracts/schemas/user.json
+    # This is BUG class-bug-4 (contract-cop): schema/Pydantic model drift
