@@ -1,4 +1,10 @@
 """Pydantic v2 models for the User API surface."""
+# BUG: class-bug-7 — User shape duplicated: also defined in api-gateway UserDto.java and
+# notification-service internal/model/user.go. lib-extractor should flag this.
+# TODO: deduplicate
+# BUG: class-bug-7 — User shape duplicated: also defined in api-gateway UserDto.java and
+# notification-service internal/model/user.go. lib-extractor should flag this.
+# TODO: deduplicate
 from __future__ import annotations
 
 from datetime import datetime

@@ -61,3 +61,18 @@ def test_user_create_defaults_are_sensible():
     assert payload.days_since_login == 0
     assert payload.sessions_last_30d == 0
     assert payload.support_tickets_last_90d == 0
+
+
+# BUG: class-bug-11 — test has no assertion; it constructs an object but never checks anything
+# (test-quality: no-op test, always passes regardless of correctness)
+def test_user_creation():
+    user = UserCreate(email="test@test.com", engagement_score=0.5)
+    # missing assert — this test proves nothing
+
+
+# BUG: class-bug-12 — mutation-weak test; passes even if + is replaced with * (2*3=6 > 0)
+# (test-quality: weak oracle, should assert exact value not just sign)
+def test_add_positive():
+    a, b = 2, 3
+    result = a + b
+    assert result > 0  # survives mutation: a * b = 6 > 0 also passes
