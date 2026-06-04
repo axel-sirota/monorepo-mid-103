@@ -10,7 +10,9 @@
       "Bash(go:*)",
       "Bash(git:*)",
       "Bash(npm:*)",
-      "Bash(terraform:*)"
+      "Bash(terraform:*)",
+      "Bash(python3:*)",
+      "Bash(claude:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
@@ -22,6 +24,43 @@
     "baseRef": "head"
   },
   "hooks": {
-    "PreToolUse": []
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/style-check.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/contract-check.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/shared-lib-check.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/test-quality-check.sh"
+          }
+        ]
+      }
+    ]
   }
 }

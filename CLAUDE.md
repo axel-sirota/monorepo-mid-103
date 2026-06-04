@@ -1,6 +1,6 @@
 # monorepo-example — Project Context
 
-> **Stage:** MID (starting state for Course 103)
+> **Stage:** FINAL (end state after all 7 labs — all craft agents, skills, hooks, and /review-pr-parallel installed)
 >
 > This is the starting state for Course 103. Students clone this repo and build 4 craft agents + `/review-pr` capstone.
 >
