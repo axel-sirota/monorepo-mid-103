@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select as sa_select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from app.models.user import User as UserModel
 from app.schemas.prediction import PredictionResponse
 from app.schemas.user import User, UserCreate
 from app.services.inference_client import InferenceClient, InferenceGatewayError
@@ -71,12 +69,15 @@ async def churn_risk_endpoint(
         ) from exc
 
 
-# BUG: class-bug-15 (security-reviewer): admin endpoint with no authentication guard
-# Should require Depends(get_current_user) or an admin role check — any caller can list all users
+# BUG: class-bug-15 — admin endpoint with no authentication guard
+# Any caller can list all users; should require Depends(get_current_user) or an admin role check
+# (security-reviewer: unauthenticated admin endpoint)
 @router.get("/admin/all", response_model=list[User])
 async def admin_list_all_users(
     session: AsyncSession = Depends(get_session),
 ) -> list[User]:
-    """Return all users. MISSING AUTH — no get_current_user dependency guard."""
+    """Return all users. MISSING AUTH — no Depends(get_current_user) guard."""
+    from sqlalchemy import select as sa_select
+    from app.models.user import User as UserModel
     result = await session.execute(sa_select(UserModel))
     return [User.model_validate(u) for u in result.scalars().all()]
