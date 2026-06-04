@@ -11,6 +11,11 @@
       "Bash(git:*)",
       "Bash(npm:*)",
       "Bash(terraform:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(DROP TABLE:*)"
     ]
   },
   "worktree": {

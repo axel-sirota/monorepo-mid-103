@@ -43,6 +43,11 @@
     "support_tickets_last_90d": {
       "type": "integer",
       "minimum": 0
+    },
+    "export_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "BUG: class-bug-4 — field in schema but missing from Python Pydantic User model (contract-cop: schema/implementation drift). BUG: class-bug-6 — also missing from Go notification-service User struct."
     }
   },
   "examples": [
