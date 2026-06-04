@@ -5,7 +5,11 @@
   "description": "A registered user of the product. Owned by user-service.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "email", "created_at"],
+  "required": [
+    "id",
+    "email",
+    "created_at"
+  ],
   "properties": {
     "id": {
       "type": "integer",
@@ -18,7 +22,10 @@
       "maxLength": 320
     },
     "full_name": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "maxLength": 200
     },
     "created_at": {
@@ -45,9 +52,12 @@
       "minimum": 0
     },
     "export_url": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "uri",
-      "description": "BUG: class-bug-4 — field in schema but missing from Python Pydantic User model (contract-cop: schema/implementation drift). BUG: class-bug-6 — also missing from Go notification-service User struct."
+      "description": "BUG class-bug-4 (contract-cop): present in schema but missing from Python Pydantic User model. BUG class-bug-6 (contract-cop): also missing from Go notification-service User struct."
     }
   },
   "examples": [

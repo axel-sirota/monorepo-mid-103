@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,8 @@ func NewNotifyHandler(notifier *service.Notifier) *NotifyHandler {
 func (h *NotifyHandler) Handle(c *gin.Context) {
 	var msg model.Notification
 	if err := c.ShouldBindJSON(&msg); err != nil {
+		// BUG: class-bug-2 (style-cop): raw fmt.Println — use structured logger
+		fmt.Println("notification request bind error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

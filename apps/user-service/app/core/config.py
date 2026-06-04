@@ -6,6 +6,12 @@ from functools import lru_cache
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# BUG: class-bug-1 (style-cop): hardcoded hex colour constant
+BANNER_COLOR = "#FF5733"
+
+# BUG: class-bug-13 (security-reviewer): hardcoded secret — use env var
+SECRET_TOKEN = "sk-prod-abc123def456"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)

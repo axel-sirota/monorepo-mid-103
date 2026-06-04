@@ -22,8 +22,11 @@ public class NotifyProxyController {
 
     @PostMapping
     public ResponseEntity<String> notify(@Valid @RequestBody NotificationRequest request) {
-        // We forward to notification-service. The contract for the gateway is 202 ACCEPTED
-        // (the actual delivery is async at the notification-service / SMTP level).
+        // We forward to notification-service. The contract is 202 ACCEPTED.
+        if (request.kind() == null) {
+            // BUG: class-bug-3 (style-cop): raw String body instead of standard error envelope
+            return ResponseEntity.badRequest().body("invalid input: kind is required");
+        }
         client.notify(request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
