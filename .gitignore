@@ -1,0 +1,59 @@
+.env
+.env.local
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Java / Maven
+target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+.idea/
+*.iml
+
+# Go
+*.exe
+*.test
+*.out
+tmp/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.vite/
+storybook-static/
+*.tsbuildinfo
+
+# Docker volumes & models
+models/
+mlruns/
+mlartifacts/
+
+# Claude / Cursor local
+.claude/settings.local.json
+.claude/.persona-manifest.json
+.cursor/.persona-manifest.json
+
+# Worktrees
+.claude/worktrees/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform_plans/
+.terraform/
+.terraform.lock.hcl

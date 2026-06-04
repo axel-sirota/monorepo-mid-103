@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://monorepo-example.local/schemas/prediction.json",
+  "title": "ChurnPrediction",
+  "description": "Inference request/response for churn-probability model. Owned by model-serving.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "PredictionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "engagement_score", "days_since_login", "sessions_last_30d", "support_tickets_last_90d"],
+      "properties": {
+        "user_id": {"type": "integer", "minimum": 1},
+        "engagement_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "days_since_login": {"type": "integer", "minimum": 0},
+        "sessions_last_30d": {"type": "integer", "minimum": 0},
+        "support_tickets_last_90d": {"type": "integer", "minimum": 0}
+      }
+    },
+    "PredictionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "churn_probability", "model_version"],
+      "properties": {
+        "user_id": {"type": "integer", "minimum": 1},
+        "churn_probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "risk_band": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Bucketed probability: low <0.33, medium <0.66, high >=0.66."
+        },
+        "model_version": {"type": "string", "examples": ["v1"]}
+      }
+    }
+  },
+  "examples": [
+    {
+      "request": {
+        "user_id": 1,
+        "engagement_score": 0.32,
+        "days_since_login": 28,
+        "sessions_last_30d": 2,
+        "support_tickets_last_90d": 4
+      },
+      "response": {
+        "user_id": 1,
+        "churn_probability": 0.81,
+        "risk_band": "high",
+        "model_version": "v1"
+      }
+    }
+  ]
+}

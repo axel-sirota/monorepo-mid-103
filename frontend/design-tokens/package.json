@@ -1,0 +1,26 @@
+{
+  "name": "@monorepo/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./dist/css/tokens.css",
+    "./tokens": {
+      "import": "./dist/ts/tokens.js",
+      "types": "./dist/ts/tokens.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "tokens",
+    "build.mjs"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "style-dictionary": "^5.0.1"
+  }
+}

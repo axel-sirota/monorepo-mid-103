@@ -1,0 +1,25 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Docs/Introduction" />
+
+# Monorepo Design System
+
+This Storybook is the living documentation for the monorepo's design system. It pulls together:
+
+- **`@monorepo/design-tokens`** — the single source of truth for color, spacing, typography, and radius primitives.
+- **`@monorepo/component-library`** — the React 19 components built on top of those tokens.
+
+## What you can do here
+
+- Browse every component in the library with interactive controls.
+- Inspect the live design tokens under **Docs / Tokens** (rendered via `storybook-design-token`).
+- Copy the import line for any component from its `Docs` tab.
+
+## Adding a new component
+
+1. Add the component to `frontend/component-library/src/<Name>/`.
+2. Use only CSS custom properties from `@monorepo/design-tokens` for styling — no hardcoded values.
+3. Add a Vitest test asserting the component is accessible.
+4. Add a `.stories.tsx` here under `frontend/docs-site/stories/`.
+
+That's it.

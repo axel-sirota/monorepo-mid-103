@@ -1,0 +1,79 @@
+# pipeline.yaml — devops persona
+#
+# Declarative contract that glues the devops persona's subagent + skills +
+# hooks + rules + scope into a single artifact. The three universal commands
+# (/architect, /start-session, /next-session) READ this file to know what to
+# verify and what to dispatch.
+
+persona: devops
+version: "102.1"
+
+scope:
+  cluster: infra
+  paths_allowed:
+    - infra/**
+  paths_denied:
+    - apps/**
+    - ml/**
+    - frontend/**
+    - prds/**
+    - contracts/**
+
+subagent:
+  name: devops-infra
+  file: .claude/agents/devops-infra.md
+  isolation: worktree
+  required_tools: [Read, Glob, Grep, Edit, Write, Bash]
+
+skills:
+  - name: add-terraform-module
+    file: .claude/skills/add-terraform-module/SKILL.md
+    dispatches_subagents: []
+
+hooks:
+  - matcher: Bash
+    if: "Bash(git commit:*)"
+    command: ${CLAUDE_PROJECT_DIR}/.claude/hooks/devops-check.sh
+    blocking: true
+    description: "Blocks commits that stage .tfstate/.tfplan files or skip terraform fmt/validate."
+
+# No .claude/rules/*.md ships for devops in 102 — cluster conventions live
+# entirely in infra/CLAUDE.md.
+rules: []
+
+cluster_claude_md: infra/CLAUDE.md
+
+architect_output:
+  plans_dir: plans/
+  sessions_dir: plans/sessions/
+  interface_contract: plans/interface-contract.md  # module inputs/outputs + resource map
+
+completion_check:
+  command: "cd infra/terraform && terraform validate"
+  expect_exit: 0
+  description: "Terraform root config validates."
+
+session_transition_check:
+  - name: "no-staged-changes"
+    command: "git diff --cached --quiet"
+    description: "Nothing left staged — the session's commit either landed or was discarded."
+  - name: "completion-check-passes"
+    command: "cd infra/terraform && terraform validate"
+    description: "Terraform root config validates at session end."
+
+# ---------------------------------------------------------------------------
+# Advisory: hard deny rules the devops persona REQUIRES in .claude/settings.json.
+# THIS BLOCK IS DOCUMENTATION ONLY. The actual permissions.deny enforcement is
+# written by `python3 personas/devops/starter-files/install-hook.py` — that
+# script is the single source of truth. /start-session reads this list and, if
+# any entry is missing from settings.json, prints a recovery hint pointing at
+# install-hook.py. It does NOT auto-patch settings.json.
+# ---------------------------------------------------------------------------
+permissions_deny:
+  - "Bash(terraform destroy:*)"
+  - "Bash(terraform state rm:*)"
+  - "Bash(rm:*)"
+  - "Edit(**/*.tfstate)"
+  - "Edit(**/*.tfstate.backup)"
+  - "Write(**/*.tfstate)"
+  - "Write(**/*.tfstate.backup)"

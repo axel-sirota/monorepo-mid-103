@@ -1,0 +1,44 @@
+# Dev override: hot reload via volume mounts + dev Dockerfiles
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  user-service:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./apps/user-service:/app
+    environment:
+      LOG_LEVEL: DEBUG
+
+  notification-service:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./apps/notification-service:/app
+    environment:
+      LOG_LEVEL: debug
+
+  api-gateway:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./apps/api-gateway/src:/workspace/src
+      - ./apps/api-gateway/pom.xml:/workspace/pom.xml
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+  model-serving:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./ml/model-serving:/app
+    environment:
+      LOG_LEVEL: DEBUG
+
+  inference-gateway:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./ml/inference-gateway:/app
+    environment:
+      LOG_LEVEL: debug

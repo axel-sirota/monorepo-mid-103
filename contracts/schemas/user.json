@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://monorepo-example.local/schemas/user.json",
+  "title": "User",
+  "description": "A registered user of the product. Owned by user-service.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "email", "created_at"],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Server-assigned primary key."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 320
+    },
+    "full_name": {
+      "type": ["string", "null"],
+      "maxLength": 200
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "engagement_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Rolling engagement metric in [0, 1]. Used as a feature for churn prediction."
+    },
+    "days_since_login": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Whole days since the user last logged in."
+    },
+    "sessions_last_30d": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "support_tickets_last_90d": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "examples": [
+    {
+      "id": 1,
+      "email": "ada@example.com",
+      "full_name": "Ada Lovelace",
+      "created_at": "2026-01-15T09:30:00Z",
+      "engagement_score": 0.82,
+      "days_since_login": 2,
+      "sessions_last_30d": 17,
+      "support_tickets_last_90d": 0
+    }
+  ]
+}

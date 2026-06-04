@@ -1,0 +1,7 @@
+# syntax=docker/dockerfile:1.7
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /workspace
+RUN apk add --no-cache wget bash
+# Source is mounted as a volume by docker-compose.dev.yml; we don't COPY here.
+EXPOSE 8080
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]

@@ -1,0 +1,8 @@
+.git
+.gitignore
+README.md
+tmp/
+*.log
+tests/testdata/
+.air.toml
+Dockerfile.dev

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://monorepo-example.local/schemas/notification.json",
+  "title": "Notification",
+  "description": "An outbound notification (today: email). Owned by notification-service.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["to_email", "subject", "body", "kind"],
+  "properties": {
+    "to_email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 320
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10000,
+      "description": "Plain-text body."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["churn_risk_alert", "welcome", "weekly_digest"],
+      "description": "Discriminator for downstream analytics."
+    },
+    "user_id": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Optional: which user this notification is about."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Free-form analytics payload. Stored as JSONB in notification_log."
+    }
+  },
+  "examples": [
+    {
+      "to_email": "ada@example.com",
+      "subject": "We miss you — here's a 20% credit",
+      "body": "Hi Ada, we noticed you haven't logged in for a while...",
+      "kind": "churn_risk_alert",
+      "user_id": 1,
+      "metadata": {"churn_probability": 0.81, "model_version": "v1"}
+    }
+  ]
+}

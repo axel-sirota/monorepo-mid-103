@@ -1,0 +1,62 @@
+# pipeline.yaml — designer persona
+#
+# Declarative contract that glues the designer persona's subagent + skills +
+# hooks + rules + scope into a single artifact. The three universal commands
+# (/architect, /start-session, /next-session) READ this file to know what to
+# verify and what to dispatch. Persona behavior is driven by these fields,
+# never by prose "if persona == designer" branching in the commands.
+
+persona: designer
+version: "102.1"
+
+scope:
+  cluster: frontend
+  paths_allowed:
+    - frontend/**
+    - contracts/schemas/**     # read-only — designer references shapes, never edits
+  paths_denied:
+    - apps/**
+    - ml/**
+    - infra/**
+    - prds/**
+
+subagent:
+  name: designer-frontend
+  file: .claude/agents/designer-frontend.md
+  isolation: worktree
+  required_tools: [Read, Glob, Grep, Edit, Write, Bash]
+
+skills:
+  - name: extract-figma-frame
+    file: .claude/skills/extract-figma-frame/SKILL.md
+    dispatches_subagents: []
+
+hooks:
+  - matcher: Bash
+    if: "Bash(git commit:*)"
+    command: ${CLAUDE_PROJECT_DIR}/.claude/hooks/designer-check.sh
+    blocking: true
+    description: "Scans staged .ts/.tsx/.css/.scss for hex/px literals; blocks commit on token-bypass violations."
+
+rules:
+  - .claude/rules/typescript.md  # loaded for frontend/**/*.{ts,tsx,css,scss}
+
+cluster_claude_md: frontend/CLAUDE.md
+
+architect_output:
+  plans_dir: plans/
+  sessions_dir: plans/sessions/
+  interface_contract: plans/interface-contract.md  # component tree + token requirements
+
+completion_check:
+  command: "cd frontend && npm test --workspaces --if-present"
+  expect_exit: 0
+  description: "All frontend workspace tests pass."
+
+session_transition_check:
+  - name: "no-staged-changes"
+    command: "git diff --cached --quiet"
+    description: "Nothing left staged — the session's commit either landed or was discarded."
+  - name: "completion-check-passes"
+    command: "cd frontend && npm test --workspaces --if-present"
+    description: "Frontend workspace suites are green at session end."

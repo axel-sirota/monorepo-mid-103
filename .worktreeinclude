@@ -1,0 +1,4 @@
+# gitignore syntax. Files matching these AND gitignored will be copied
+# into every Claude Code worktree created for this repo.
+.env
+.env.local

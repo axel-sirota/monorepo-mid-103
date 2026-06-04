@@ -1,0 +1,47 @@
+# {{MODULE_NAME}}
+
+## Purpose
+
+Brief one-paragraph description of what {{MODULE_NAME}} provisions and why
+it exists as a separate module. Include the failure mode this module prevents
+(naming drift? config sprawl? duplicated provider wiring?).
+
+## Usage
+
+```hcl
+module "{{MODULE_NAME}}_example" {
+  source = "./modules/{{MODULE_NAME}}"
+
+  name        = "example"
+  environment = "dev"
+  tags = {
+    project = "monorepo"
+    owner   = "devops"
+  }
+}
+```
+
+## Inputs
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `name` | `string` | (required) | Name of this {{MODULE_NAME}} instance |
+| `environment` | `string` | `"dev"` | Deployment environment |
+| `tags` | `map(string)` | `{}` | Additional resource tags |
+
+## Outputs
+
+| Name | Description |
+|---|---|
+| _(add as you declare them in `outputs.tf`)_ | |
+
+## Examples
+
+See `examples/` once added. Each example is a self-contained `.tf` file that
+calls this module with a representative set of inputs.
+
+## Conventions
+
+- Plan-and-apply safe: no `terraform destroy` required during normal lifecycle.
+- Always run `terraform plan -out=...` before `terraform apply`.
+- Secrets stay out of state — use provider-native secret references, not literals.

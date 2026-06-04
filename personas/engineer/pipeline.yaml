@@ -1,0 +1,105 @@
+# pipeline.yaml — engineer persona
+#
+# Declarative contract that glues the engineer persona's subagent + skills +
+# hooks + rules + scope into a single artifact. The three universal commands
+# (/architect, /start-session, /next-session) READ this file to know what to
+# verify and what to dispatch. Persona behavior is driven by these fields,
+# never by prose "if persona == engineer" branching in the commands.
+#
+# When `.claude/pipeline.yaml` is present, the persona is "installed". It is
+# copied here from `personas/<persona>/pipeline.yaml` during persona setup
+# (today: `cp -R personas/engineer/starter-files/* .claude/` plus this file).
+
+persona: engineer
+version: "102.1"
+
+# ---------------------------------------------------------------------------
+# Scope — where the persona is allowed to work. /start-session refuses if the
+# session goal touches paths outside this scope (best-effort textual check;
+# the subagent's own scope refusal is the hard enforcement).
+# ---------------------------------------------------------------------------
+scope:
+  cluster: apps
+  paths_allowed:
+    - apps/**
+    - contracts/schemas/**     # read-only — engineer consumes contracts, never edits
+  paths_denied:
+    - ml/**
+    - frontend/**
+    - infra/**
+    - prds/**
+
+# ---------------------------------------------------------------------------
+# Subagent — /start-session dispatches this via the Task tool with
+# isolation=worktree and the session goal as the prompt.
+# ---------------------------------------------------------------------------
+subagent:
+  name: engineer-apps
+  file: .claude/agents/engineer-apps.md
+  isolation: worktree
+  required_tools: [Read, Glob, Grep, Edit, Write, Bash]
+
+# ---------------------------------------------------------------------------
+# Skills — /start-session verifies each SKILL.md exists. If a skill dispatches
+# other subagents (via the Task tool), list them under `dispatches_subagents:`
+# so /start-session can warn if those agent files are missing.
+# ---------------------------------------------------------------------------
+skills:
+  - name: add-endpoint
+    file: .claude/skills/add-endpoint/SKILL.md
+    dispatches_subagents: [test-runner]
+
+# ---------------------------------------------------------------------------
+# Hooks — /start-session reads .claude/settings.json and confirms each entry
+# is registered. If not, FAIL with a recovery hint pointing at install-hook.py.
+# ---------------------------------------------------------------------------
+hooks:
+  - matcher: Bash
+    if: "Bash(git commit:*)"
+    command: ${CLAUDE_PROJECT_DIR}/.claude/hooks/engineer-check.sh
+    blocking: true
+    description: "Runs `make test-apps`; blocks the commit if any apps/ test fails."
+
+# ---------------------------------------------------------------------------
+# Path-scoped rules — /start-session verifies each exists.
+# ---------------------------------------------------------------------------
+rules:
+  - .claude/rules/spring.md      # loaded for apps/api-gateway/**/*.java
+  - .claude/rules/fastapi.md     # loaded for apps/user-service/**/*.py
+  - .claude/rules/go-gin.md      # loaded for apps/notification-service/**/*.go
+
+# Per-cluster CLAUDE.md the persona consults for cluster conventions.
+cluster_claude_md: apps/CLAUDE.md
+
+# ---------------------------------------------------------------------------
+# Architect output — /architect uses these paths when scaffolding planning
+# docs. The "interface_contract" path is the persona's interface-design
+# artifact (for engineer: REST routes + data model).
+# ---------------------------------------------------------------------------
+architect_output:
+  plans_dir: plans/
+  sessions_dir: plans/sessions/
+  interface_contract: plans/interface-contract.md
+
+# ---------------------------------------------------------------------------
+# Completion check — what /start-session runs to confirm the session is
+# implementation-complete before transitioning. Exit code must equal
+# `expect_exit`.
+# ---------------------------------------------------------------------------
+completion_check:
+  command: "make test-apps"
+  expect_exit: 0
+  description: "All apps/ cluster tests pass."
+
+# ---------------------------------------------------------------------------
+# Session transition check — /next-session runs each command in order. If any
+# returns non-zero, /next-session REFUSES to transition and names the failing
+# check.
+# ---------------------------------------------------------------------------
+session_transition_check:
+  - name: "no-staged-changes"
+    command: "git diff --cached --quiet"
+    description: "Nothing left staged — the session's commit either landed or was discarded."
+  - name: "completion-check-passes"
+    command: "make test-apps"
+    description: "Cluster suite is green at session end."

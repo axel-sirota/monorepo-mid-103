@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  mvc:
+    problemdetails:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+gateway:
+  api-key: ${API_KEY:}
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8001}
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8002}
+
+logging:
+  level:
+    root: INFO
+    com.example.gateway: INFO

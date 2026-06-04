@@ -1,0 +1,18 @@
+# Outputs from module {{MODULE_NAME}}.
+#
+# Every output MUST have a description. Add outputs for any resource attribute
+# a consumer of this module is likely to need (id, arn, endpoint, etc.).
+#
+# Examples:
+#
+# output "id" {
+#   description = "The ID of the primary {{MODULE_NAME}} resource"
+#   value       = aws_s3_bucket.this.id
+# }
+#
+# output "arn" {
+#   description = "The ARN of the primary {{MODULE_NAME}} resource"
+#   value       = aws_s3_bucket.this.arn
+# }
+
+# Replace these comments with real outputs.

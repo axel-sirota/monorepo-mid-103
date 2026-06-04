@@ -1,0 +1,19 @@
+# Provider + terraform version pinning for module {{MODULE_NAME}}.
+
+terraform {
+  required_version = ">= 1.7.0"
+
+  required_providers {
+    # Uncomment + adjust the providers this module uses. Pin versions.
+    #
+    # aws = {
+    #   source  = "hashicorp/aws"
+    #   version = "~> 5.0"
+    # }
+    #
+    # null = {
+    #   source  = "hashicorp/null"
+    #   version = "~> 3.2"
+    # }
+  }
+}

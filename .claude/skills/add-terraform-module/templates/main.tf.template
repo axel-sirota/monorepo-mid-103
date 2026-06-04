@@ -1,0 +1,20 @@
+# Module: {{MODULE_NAME}}
+#
+# Resources for this module go here. Replace the placeholder below with
+# real resource declarations once you know what {{MODULE_NAME}} provisions.
+#
+# Examples:
+#
+# resource "aws_s3_bucket" "this" {
+#   bucket = var.name
+#   tags   = var.tags
+# }
+#
+# resource "null_resource" "{{MODULE_NAME}}_placeholder" {
+#   triggers = {
+#     name        = var.name
+#     environment = var.environment
+#   }
+# }
+
+# DELETE this comment block once you add real resources.

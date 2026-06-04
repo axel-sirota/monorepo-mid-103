@@ -1,0 +1,17 @@
+{
+  "name": "monorepo-frontend",
+  "private": true,
+  "workspaces": [
+    "design-tokens",
+    "component-library",
+    "docs-site"
+  ],
+  "scripts": {
+    "build:tokens": "npm run build --workspace=@monorepo/design-tokens",
+    "build:components": "npm run build --workspace=@monorepo/component-library",
+    "build": "npm run build:tokens && npm run build:components",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "storybook": "npm run storybook --workspace=@monorepo/docs-site"
+  }
+}

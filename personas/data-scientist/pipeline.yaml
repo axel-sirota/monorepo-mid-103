@@ -1,0 +1,68 @@
+# pipeline.yaml — data-scientist persona
+#
+# Declarative contract that glues the data-scientist persona's subagent +
+# skills + hooks + rules + scope into a single artifact. The three universal
+# commands (/architect, /start-session, /next-session) READ this file to know
+# what to verify and what to dispatch.
+
+persona: data-scientist
+version: "102.1"
+
+scope:
+  cluster: ml
+  paths_allowed:
+    - ml/**
+    - contracts/schemas/prediction.json
+    - apps/user-service/**     # read-only verification of end-to-end churn lookup
+  # Sub-key noted for read-only entries inside paths_allowed.
+  paths_readonly:
+    - contracts/schemas/prediction.json
+    - apps/user-service/**
+  paths_denied:
+    - apps/api-gateway/**
+    - apps/notification-service/**
+    - frontend/**
+    - infra/**
+    - prds/**
+
+subagent:
+  name: data-scientist-ml
+  file: .claude/agents/data-scientist-ml.md
+  isolation: worktree
+  required_tools: [Read, Glob, Grep, Edit, Write, Bash, Task]
+
+skills:
+  - name: log-experiment
+    file: .claude/skills/log-experiment/SKILL.md
+    dispatches_subagents: []
+
+hooks:
+  - matcher: Bash
+    if: "Bash(git commit:*)"
+    command: ${CLAUDE_PROJECT_DIR}/.claude/hooks/data-scientist-check.sh
+    blocking: true
+    description: "Blocks commits where a staged .ipynb has missing/out-of-order execution counts, or a training-shaped .py lacks a seed."
+
+# data-scientist relies on ml/CLAUDE.md for cluster conventions; no
+# path-scoped .claude/rules/*.md ships in 102 for this persona.
+rules: []
+
+cluster_claude_md: ml/CLAUDE.md
+
+architect_output:
+  plans_dir: plans/
+  sessions_dir: plans/sessions/
+  interface_contract: plans/interface-contract.md  # experiment plan: data sources, EDA hypotheses, models, metrics
+
+completion_check:
+  command: "make test-ml"
+  expect_exit: 0
+  description: "All ml/ cluster tests pass."
+
+session_transition_check:
+  - name: "no-staged-changes"
+    command: "git diff --cached --quiet"
+    description: "Nothing left staged — the session's commit either landed or was discarded."
+  - name: "completion-check-passes"
+    command: "make test-ml"
+    description: "ml/ cluster suites are green at session end."

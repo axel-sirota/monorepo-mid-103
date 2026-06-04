@@ -1,0 +1,75 @@
+import { Meta } from '@storybook/blocks';
+import { ColorPalette, ColorItem } from 'storybook-design-token/dist/preview';
+
+<Meta title="Docs/Tokens" />
+
+# Design Tokens
+
+These tokens are generated from `@monorepo/design-tokens` and exposed as CSS custom properties on `:root`. They are the only colors, spacings, radii, and typographic values that components are allowed to use.
+
+The `storybook-design-token` addon parses the loaded CSS variables and renders the panels below. You can also open the **Design tokens** tool in the Storybook toolbar to browse them interactively.
+
+## Colors
+
+<ColorPalette>
+  <ColorItem
+    title="Brand"
+    subtitle="Primary palette"
+    colors={{
+      primary: 'var(--color-primary)',
+      secondary: 'var(--color-secondary)',
+    }}
+  />
+  <ColorItem
+    title="Neutral"
+    subtitle="Greyscale"
+    colors={{
+      '0': 'var(--color-neutral-0)',
+      '100': 'var(--color-neutral-100)',
+      '500': 'var(--color-neutral-500)',
+      '900': 'var(--color-neutral-900)',
+    }}
+  />
+  <ColorItem
+    title="Status"
+    subtitle="Feedback semantics"
+    colors={{
+      danger: 'var(--color-danger)',
+      warning: 'var(--color-warning)',
+      success: 'var(--color-success)',
+    }}
+  />
+</ColorPalette>
+
+## Spacing scale
+
+| Token | Value |
+| --- | --- |
+| `--spacing-xs` | 4px |
+| `--spacing-sm` | 8px |
+| `--spacing-md` | 16px |
+| `--spacing-lg` | 24px |
+| `--spacing-xl` | 32px |
+
+## Typography
+
+| Token | Value |
+| --- | --- |
+| `--font-size-xs` | 12px |
+| `--font-size-sm` | 14px |
+| `--font-size-md` | 16px |
+| `--font-size-lg` | 20px |
+| `--font-size-xl` | 24px |
+| `--font-size-xxl` | 32px |
+| `--font-weight-regular` | 400 |
+| `--font-weight-semibold` | 600 |
+| `--font-weight-bold` | 700 |
+
+## Radius
+
+| Token | Value |
+| --- | --- |
+| `--radius-none` | 0px |
+| `--radius-sm` | 4px |
+| `--radius-md` | 8px |
+| `--radius-lg` | 16px |

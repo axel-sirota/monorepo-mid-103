@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "github": {
+      "_note": "Replace in client-config for GitHub Enterprise.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"}
+    },
+    "postgres": {
+      "_note": "Optional. Reads from local docker-compose postgres by default.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"]
+    },
+    "playwright": {
+      "_note": "Browser automation for E2E checks.",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}

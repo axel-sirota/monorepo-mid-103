@@ -1,0 +1,64 @@
+# pipeline.yaml — pm persona
+#
+# Declarative contract that glues the PM persona's subagent + skills + hooks +
+# rules + scope into a single artifact. The three universal commands
+# (/architect, /start-session, /next-session) READ this file to know what to
+# verify and what to dispatch.
+
+persona: pm
+version: "102.1"
+
+scope:
+  cluster: prds
+  paths_allowed:
+    - prds/**
+    - contracts/schemas/**     # read-only — PRDs cross-reference shapes, never edit them
+  paths_denied:
+    - apps/**
+    - ml/**
+    - frontend/**
+    - infra/**
+
+subagent:
+  name: pm-prds
+  file: .claude/agents/pm-prds.md
+  isolation: worktree
+  required_tools: [Read, Glob, Grep, Edit, Write, Task]
+
+skills:
+  - name: decompose-epic
+    file: .claude/skills/decompose-epic/SKILL.md
+    # decompose-epic fans out three named perspective subagents in parallel
+    # via the Task tool — those agent files must exist for the skill to work.
+    dispatches_subagents: [pm-dev-perspective, pm-qa-perspective, pm-gap-detector]
+
+hooks:
+  - matcher: Bash
+    if: "Bash(git commit:*)"
+    command: ${CLAUDE_PROJECT_DIR}/.claude/hooks/pm-check.sh
+    blocking: true
+    description: "Validates staged prds/*.md for Given/When/Then markers, NFR section, and story headings; blocks on violations."
+
+rules:
+  - .claude/rules/pm.md  # loaded for prds/**/*.md
+
+# PM uses the path-scoped rule for cluster conventions rather than a CLAUDE.md
+# under prds/ (the PRDs directory is content, not a code cluster).
+cluster_claude_md: null
+
+architect_output:
+  plans_dir: plans/
+  sessions_dir: plans/sessions/
+  interface_contract: plans/interface-contract.md  # PRD structure: goals, personas, INVEST stories, NFRs
+
+completion_check:
+  # No make target for PRDs — the pre-commit hook IS the validator. Re-run it
+  # against the staged set to confirm the PRD work meets the gate.
+  command: "bash .claude/hooks/pm-check.sh"
+  expect_exit: 0
+  description: "PM hook accepts the staged PRD(s) — G/W/T + NFR + INVEST structure intact."
+
+session_transition_check:
+  - name: "no-staged-changes"
+    command: "git diff --cached --quiet"
+    description: "Nothing left staged — the session's commit either landed or was discarded."
