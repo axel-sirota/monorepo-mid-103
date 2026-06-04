@@ -1,107 +1,141 @@
-# monorepo-example
+# monorepo-mid-103
 
-A runnable polyglot SaaS demo used by **Salesforce Course 102 and Course 103**. Models a small internal product: an ML-powered churn-risk emailer.
+Starting state for **Salesforce Course 103 — Craft Agents on a Real Monorepo**.
 
-> **You are at the INITIAL stage.** The product works. The Claude Code extension layer (agents + skills + hooks + review pipeline + cost telemetry + Agent Teams) is **what we build together in 102 and 103**. Nothing in `.claude/` is pre-shipped.
+> **Stage:** MID — the product works, the 102 agent+skill+hook layer is pre-installed. You build the **4 craft agents + `/review-pr` capstone** in Course 103.
 
-## What's inside
+---
 
-```
-monorepo-example/
-├── apps/                       # engineer cluster
-│   ├── api-gateway/            # Java 21 / Spring Boot 3 / Maven
-│   ├── user-service/           # Python 3.12 / FastAPI / uv
-│   └── notification-service/   # Go 1.22 / Gin / sqlx
-├── ml/                         # data-scientist cluster
-│   ├── model-serving/          # FastAPI + scikit-learn
-│   ├── training/               # one-shot trainer + MLflow
-│   └── inference-gateway/      # Go Gin proxy with API key + rate limit
-├── frontend/                   # designer cluster
-│   ├── design-tokens/          # Style Dictionary v5
-│   ├── component-library/      # Vite + React 19 + TypeScript
-│   └── docs-site/              # Storybook 8
-├── infra/                      # devops cluster
-│   ├── terraform/              # local-stub terraform
-│   └── docker/postgres-init/   # initial database creation
-├── prds/                       # pm cluster (PRDs in Markdown)
-├── contracts/                  # shared (JSON Schema today; OpenAPI by end of 103)
-├── personas/                   # persona packs installed by /set-persona
-└── materials/                  # 102 + 103 decks and labs
-```
+## Prerequisites — install before class
 
-## Run it
+| Tool | Install | Verify |
+|---|---|---|
+| Docker Desktop (≥ 4.x) | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) | `docker --version` |
+| Claude Code CLI | `npm install -g @anthropic-ai/claude-code` | `claude --version` |
+| OpenAPI Generator (Lab 6 only) | `npm install -g @openapitools/openapi-generator-cli` | `openapi-generator version` |
 
-You need Docker Desktop. That's it.
+Docker Desktop needs at least **8 GB** of memory allocated (Settings → Resources → Memory).
+
+---
+
+## Getting started
 
 ```bash
+git clone https://github.com/axel-sirota/monorepo-mid-103
+cd monorepo-mid-103
 cp .env.example .env
 make up
 ```
 
-Wait ~60 seconds for everything to come up healthy. Then:
+Wait ~60 s for all services to come up healthy. Then verify:
 
 ```bash
-make train             # trains the churn model and writes the joblib
-make predict           # sample prediction request
-make logs              # tail logs across all services
+curl http://localhost:8080/health    # api-gateway
+curl http://localhost:8001/health    # user-service
+curl http://localhost:8002/health    # notification-service
 ```
 
-Hit:
-- `http://localhost:8080/health` — api-gateway
-- `http://localhost:8001/docs` — user-service OpenAPI UI
-- `http://localhost:8002/health` — notification-service
-- `http://localhost:9000/health` — inference-gateway
-- `http://localhost:9001/health` — model-serving
-- `http://localhost:8025` — Mailhog UI (dev SMTP catch-all)
-- `http://localhost:5000` — MLflow UI
+Open the course materials in your browser:
+- `salesforce-103/materials/index.html` (your instructor will share this file)
 
-Stop with `make down`. Wipe state with `make reset`.
+---
 
-## Develop in one service
+## What's inside
 
-Each service has its own README with standalone run instructions (no Docker needed if you have the language toolchain locally).
+```
+monorepo-mid-103/
+├── apps/
+│   ├── api-gateway/            Java 21 / Spring Boot 3
+│   ├── user-service/           Python 3.12 / FastAPI
+│   └── notification-service/   Go 1.22 / Gin
+├── ml/                         Python sklearn + MLflow + Go inference proxy
+├── frontend/                   React 19 + Style Dictionary + Storybook
+├── infra/                      Terraform (local stub)
+├── contracts/
+│   ├── schemas/                JSON Schema (source of truth — Lab 2 target)
+│   └── openapi/                OpenAPI 3.0 spec (Lab 6 target)
+├── libs/                       Shared library home — empty today, populated in Lab 3
+├── prds/                       Markdown PRDs (0001-churn-notification, 0002-export-user-data)
+└── .claude/
+    ├── agents/                 Your 102 subagents + Lab 1-4 craft agents go here
+    ├── skills/                 Your 102 skills + Lab 1-4 craft skills go here
+    ├── hooks/                  Your 102 hooks + Lab 1-4 craft hooks go here
+    ├── commands/               /review-pr capstone goes here (Lab 5)
+    ├── rules/                  Style rule files go here (Lab 1)
+    └── settings.json           Permissions + hook registration
+```
 
-For hot reload across the full stack:
+---
+
+## Lab overview
+
+| Lab | What you build | Branch |
+|---|---|---|
+| Lab 1 — Style | `style-cop` agent + `/enforce-style` skill + `style-check.sh` hook | `feat/class-bugs` |
+| Lab 2 — Contract | `contract-cop` agent + `/validate-contracts` skill + `contract-check.sh` hook | `feat/class-bugs` |
+| Lab 3 — Shared-lib | `lib-extractor` agent + `/extract-shared` skill + `shared-lib-check.sh` hook + `libs/` | `feat/class-bugs` |
+| Lab 4 — Test-quality | `test-quality` agent + `/measure-test-quality` skill + `test-quality-check.sh` hook | `feat/class-bugs` |
+| Lab 5 — Capstone | `security-reviewer` agent + `/review-pr` command (composes Labs 1-4 + security) | `feat/class-bugs` |
+| Lab 6 — Codegen | Instructor demo: live OpenAPI edit → `make codegen` → `/review-pr` on the diff | `main` |
+
+For Labs 1–5, checkout the pre-seeded bug branch first:
 
 ```bash
-make up-dev
+git checkout feat/class-bugs
 ```
 
-## Test
+---
+
+## Registering a hook (Lab 1–4 pattern)
+
+After writing your hook script at `.claude/hooks/<name>.sh`, register it in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/style-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Repeat for each craft hook — add a new entry to the `hooks` array. The colon-star matcher (`Bash(git commit:*)`) is required; space-star (`Bash(git commit *)`) is broken (GH #36389).
+
+---
+
+## Common make targets
 
 ```bash
-make test              # everything
-make test-apps         # Java + Python + Go in apps/
-make test-ml           # Python + Go in ml/
-make test-frontend     # vitest in frontend/
+make up          # start full stack
+make down        # stop
+make reset       # stop + wipe volumes
+make logs        # tail all services
+make train       # train churn model (run once after make up)
+make predict     # sample prediction
+make test        # run all tests
+make codegen     # regenerate OpenAPI stubs (Lab 6 — requires openapi-generator)
+make help        # full target list
 ```
 
-## Class-time orientation
+---
 
-| You're here | Read this |
-| ----------- | --------- |
-| Day 1, Course 102 | `materials/102/instructor-notes.md` for the instructor; `materials/102/labs/102-lab-1-subagents.md` for the first lab |
-| Day 1, Course 103 | `materials/103/instructor-notes.md`; `materials/103/labs/103-lab-1-review-pipeline.md` |
-| Just here exploring | `prds/0001-churn-notification.md` (the seed feature) and the per-service READMEs |
+## Useful URLs (while stack is running)
 
-## Course flow at a glance
-
-- **102** turns this raw monorepo into a *scoped, parallel, guard-railed* dev environment by adding subagents, skills, and hooks per persona.
-- **103** takes the 102 output and makes it *production-grade*: parallel review pipeline, cost telemetry + model routing, Agent Teams for cross-service work, and a contracts migration from JSON Schema to OpenAPI with codegen.
-
-Read `CLAUDE.md` for the architecture overview Claude itself sees.
-
-## Prerequisites for local dev (outside Docker)
-
-| Language   | Version | Why |
-| ---------- | ------- | --- |
-| Docker     | 25+     | Required for `docker compose`. Everything else is optional. |
-| Java       | 21      | Only if you want to run api-gateway outside Docker (`mvn spring-boot:run`) |
-| Python     | 3.12    | Only if you want to run Python services outside Docker |
-| `uv`       | latest  | Python dep manager (`brew install uv` or `pip install uv`) |
-| Go         | 1.22+   | Only if you want to run Go services outside Docker |
-| Node       | 20+     | Only if you want to run frontend outside Docker |
-
-## License
-
-Internal training material. Not for redistribution.
+| Service | URL |
+|---|---|
+| api-gateway | http://localhost:8080 |
+| user-service docs | http://localhost:8001/docs |
+| notification-service | http://localhost:8002/health |
+| inference-gateway | http://localhost:9000/health |
+| model-serving | http://localhost:9001/health |
+| Mailhog (email UI) | http://localhost:8025 |
+| MLflow UI | http://localhost:5000 |
