@@ -1,0 +1,262 @@
+openapi: "3.1.0"
+info:
+  title: User Service API
+  description: |
+    REST API for the user-service. Owned by the platform team.
+    This spec is the source of truth for Lab 6 (API codegen).
+  version: "1.0.0"
+  contact:
+    name: Platform Team
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+
+tags:
+  - name: users
+    description: User management endpoints
+
+paths:
+  /users:
+    get:
+      summary: List users
+      operationId: listUsers
+      tags: [users]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Paginated list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                  total:
+                    type: integer
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    post:
+      summary: Create a user
+      operationId: createUser
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "409":
+          description: Email already registered
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /users/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+
+    get:
+      summary: Get a user by ID
+      operationId: getUser
+      tags: [users]
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      summary: Update a user
+      operationId: updateUser
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      summary: Delete a user
+      operationId: deleteUser
+      tags: [users]
+      responses:
+        "204":
+          description: User deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/{user_id}/export:
+    post:
+      summary: Request a GDPR data export for a user
+      operationId: exportUserData
+      tags: [users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "202":
+          description: Export job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  export_url:
+                    type: string
+                    format: uri
+                    nullable: true
+                  status:
+                    type: string
+                    enum: [pending, ready, failed]
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, email, created_at]
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          description: Server-assigned primary key.
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+        engagement_score:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Rolling engagement metric in [0,1]. Used for churn prediction.
+        days_since_login:
+          type: integer
+          minimum: 0
+        sessions_last_30d:
+          type: integer
+          minimum: 0
+        support_tickets_last_90d:
+          type: integer
+          minimum: 0
+        export_url:
+          type: string
+          format: uri
+          nullable: true
+
+    UserCreate:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 200
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 200
+
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                    msg:
+                      type: string
+                    type:
+                      type: string
