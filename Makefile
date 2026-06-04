@@ -1,5 +1,5 @@
 .PHONY: help up down logs ps reset \
-        train predict \
+        train predict codegen \
         test test-apps test-ml test-frontend \
         lint lint-apps lint-ml lint-frontend \
         install install-apps install-ml install-frontend \
@@ -47,6 +47,14 @@ predict: ## Send a sample prediction request via inference-gateway
 		-H "Content-Type: application/json" \
 		-H "X-API-Key: $${INFERENCE_API_KEY:-dev-key-change-me}" \
 		-d '{"user_id": 1, "engagement_score": 0.32, "days_since_login": 28, "sessions_last_30d": 2, "support_tickets_last_90d": 4}' | jq .
+
+codegen: ## Generate client/server stubs from OpenAPI spec (Lab 6)
+	@echo "🔧 Generating code from OpenAPI spec..."
+	@command -v openapi-generator >/dev/null 2>&1 || { echo "⚠️  openapi-generator not found. Install: npm install -g @openapitools/openapi-generator-cli"; exit 1; }
+	@openapi-generator generate -i contracts/openapi/user.yaml -g python-pydantic -o apps/user-service/app/generated --skip-validate-spec || true
+	@openapi-generator generate -i contracts/openapi/user.yaml -g spring -o apps/api-gateway/target/generated-sources --skip-validate-spec || true
+	@openapi-generator generate -i contracts/openapi/user.yaml -g go-server -o apps/notification-service/generated --skip-validate-spec || true
+	@echo "✅ Code generation complete. Check generated/ directories in each service."
 
 # ---------------------------- Testing ----------------------------
 

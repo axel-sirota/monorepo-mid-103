@@ -1,0 +1,20 @@
+# OpenAPI Generator Ignore List
+# Prevents overwriting hand-written code
+
+# Python (user-service)
+apps/user-service/app/main.py
+apps/user-service/app/core/**
+apps/user-service/app/services/**
+apps/user-service/app/api/**
+apps/user-service/tests/**
+
+# Java (api-gateway)
+apps/api-gateway/src/main/java/com/example/gateway/controller/**
+apps/api-gateway/src/main/java/com/example/gateway/service/**
+apps/api-gateway/pom.xml
+
+# Go (notification-service)
+apps/notification-service/main.go
+apps/notification-service/internal/**
+apps/notification-service/go.mod
+apps/notification-service/go.sum
